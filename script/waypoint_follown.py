@@ -58,8 +58,7 @@ def main():
     file_path = '/home/franklin/ws/src/my_bot/script/test10.json'
     goal_poses = []
 
-    # Chemin vers le fichier JSON
-    #file_path = "chemin/vers/fichier.json"
+   
 
     # Charger le fichier JSON
     with open(file_path, "r") as file:
@@ -82,43 +81,12 @@ def main():
             goal_pose1.header.stamp = navigator.get_clock().now().to_msg()
             goal_pose1.pose.position.x = pose["pose"]["position"]['x']
             goal_pose1.pose.position.y = pose["pose"]["position"]['y']
-            #goal_pose1.pose.position.y = pose["pose"]["position"]['z']
-            #goal_pose1.pose.orientation.w = pose["pose"]["orientation"]['x']
-            #goal_pose1.pose.orientation.z = pose["pose"]["orientation"]['y']
             goal_pose1.pose.orientation.z = pose["pose"]["orientation"]['z']
             goal_pose1.pose.orientation.z = pose["pose"]["orientation"]['w']
 
         goal_poses.append(goal_pose1)
 
-    # # set our demo's goal poses to follow
-    # goal_poses = []
-    # goal_pose1 = PoseStamped()
-    # goal_pose1.header.frame_id = 'map'
-    # goal_pose1.header.stamp = navigator.get_clock().now().to_msg()
-    # goal_pose1.pose.position.x = 1.5
-    # goal_pose1.pose.position.y = 0.55
-    # goal_pose1.pose.orientation.w = 0.707
-    # goal_pose1.pose.orientation.z = 0.707
-    # goal_poses.append(goal_pose1)
-
-    # # additional goals can be appended
-    # goal_pose2 = PoseStamped()
-    # goal_pose2.header.frame_id = 'map'
-    # goal_pose2.header.stamp = navigator.get_clock().now().to_msg()
-    # goal_pose2.pose.position.x = 1.5
-    # goal_pose2.pose.position.y = -3.75
-    # goal_pose2.pose.orientation.w = 0.707
-    # goal_pose2.pose.orientation.z = 0.707
-    # goal_poses.append(goal_pose2)
-    # goal_pose3 = PoseStamped()
-    # goal_pose3.header.frame_id = 'map'
-    # goal_pose3.header.stamp = navigator.get_clock().now().to_msg()
-    # goal_pose3.pose.position.x = -3.6
-    # goal_pose3.pose.position.y = -4.75
-    # goal_pose3.pose.orientation.w = 0.707
-    # goal_pose3.pose.orientation.z = 0.707
-    # goal_poses.append(goal_pose3)
-
+    
     # sanity check a valid path exists
     # path = navigator.getPath(initial_pose, goal_pose1)
 
