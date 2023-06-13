@@ -31,3 +31,12 @@ ros2 launch my_bot launch_sim.launch.py
 ```
 ros2 run my_bot vitual_gps.py
 ```
+### client node to save the coordinates, make sure that nav1.launch.py run also set the right path of the json file in your workspace
+```
+ros2 launch my_bot save_coordinates_client.py
+```
+### others nodes, make sure that nav1.launch.py run also set the right path of the json file in your workspace
+```
+ros2 run my_bot nav_through.py
+ros2 run my_bot waypoint_follown.py
+```
