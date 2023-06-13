@@ -35,11 +35,15 @@ find_package(action_msgs REQUIRED)
 # further dependencies manually.
 # find_package(<dependency> REQUIRED)
 install(
-  DIRECTORY config description launch worlds script
+  DIRECTORY config description launch worlds script srv
   DESTINATION share/${PROJECT_NAME}
 )
 
-
+find_package(rosidl_default_generators REQUIRED)
+rosidl_generate_interfaces(${PROJECT_NAME}
+  "srv/Savepoint.srv"
+  DEPENDENCIES geometry_msgs 
+)
 # Install Python modules
 ament_python_install_package(${PROJECT_NAME})
 # Install Python executables
@@ -49,6 +53,11 @@ install(PROGRAMS
   script/robot_navigator.py
   script/nav_to_pose.py
   script/vitual_gps.py
+  script/save_coordinates_server.py
+  script/save_coordinates_client.py
+  script/transform.py
+  script/nav_through.py
+  script/waypoint_follown.py
   DESTINATION lib/${PROJECT_NAME}
 )
 

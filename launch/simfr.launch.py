@@ -27,7 +27,7 @@ def generate_launch_description():
     )
 
     gazebo_params_file = os.path.join(get_package_share_directory(package_name), 'config', 'gazebo_params.yaml')
-    robot_localization_file_path = os.path.join(get_package_share_directory('my_bot'), 'config' , 'ekf_with_gps.yaml')
+    robot_localization_file_path = os.path.join(get_package_share_directory('my_bot'), 'config' , 'ekf_with_gps1.yaml')
 
     #default_rviz_config_path = os.path.join(get_package_share_directory(package_name), 'worlds', 'nav2_config.rviz')
 
@@ -162,9 +162,9 @@ def generate_launch_description():
         start_robot_localization_local_cmd,
         start_robot_localization_global_cmd,
         start_navsat_transform_cmd,
-        start_robot_localization_global_cmd_vitual,
-        start_navsat_transform_cmd_vitual,
-        vitual_gps_node,
+        #start_robot_localization_global_cmd_vitual,
+        #start_navsat_transform_cmd_vitual,
+        #vitual_gps_node,
         #diff_drive_spawner,
         #joint_broad_spawner,
         #rviz_node

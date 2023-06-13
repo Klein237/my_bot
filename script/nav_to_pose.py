@@ -119,7 +119,7 @@ def main():
       print('Goal has an invalid return status!')
 
   # Shut down the ROS 2 Navigation Stack
-  navigator.lifecycleShutdown()
+  #navigator.lifecycleShutdown()
 
   exit(0)
 

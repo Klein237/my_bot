@@ -21,8 +21,8 @@ def generate_launch_description():
 
     package_name = 'my_bot' #<--- CHANGE ME
 
-    static_map_path = os.path.join(get_package_share_directory(package_name), 'worlds', 'map_gps1.yaml')
-    nav2_params_path = os.path.join(get_package_share_directory('my_bot'), 'worlds', 'nav2_gps.yaml')
+    static_map_path = os.path.join(get_package_share_directory(package_name), 'worlds', 'map.yaml')
+    nav2_params_path = os.path.join(get_package_share_directory('my_bot'), 'worlds', 'nav2_gps1.yaml')
     default_rviz_config_path = os.path.join(get_package_share_directory(package_name), 'worlds', 'nav2_config.rviz')
 
     nav2_dir = FindPackageShare(package='nav2_bringup').find('nav2_bringup')

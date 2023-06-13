@@ -21,8 +21,8 @@ def generate_launch_description():
 
     package_name = 'my_bot' #<--- CHANGE ME
 
-    static_map_path = os.path.join(get_package_share_directory(package_name), 'worlds', 'my_map1.yaml')
-    nav2_params_path = os.path.join(get_package_share_directory('my_bot'), 'worlds', 'nav2_params5.yaml')
+    static_map_path = os.path.join(get_package_share_directory(package_name), 'worlds', 'map.yaml')
+    nav2_params_path = os.path.join(get_package_share_directory('my_bot'), 'worlds', 'nav2_gps1.yaml')
     default_rviz_config_path = os.path.join(get_package_share_directory(package_name), 'worlds', 'nav2_config.rviz')
 
     nav2_dir = FindPackageShare(package='nav2_bringup').find('nav2_bringup')
@@ -30,53 +30,37 @@ def generate_launch_description():
 
     nav2_bt_path = FindPackageShare(package='nav2_bt_navigator').find('nav2_bt_navigator')
     behavior_tree_xml_path = os.path.join(nav2_bt_path, 'behavior_trees', 'navigate_w_replanning_and_recovery.xml')
+    robot_localization_file_path = os.path.join(get_package_share_directory('my_bot'), 'config' , 'ekf_with_gps1.yaml')
+    use_sim_time = LaunchConfiguration('use_sim_time')
+
+    waypoint_follower_params = {
+        'WaypointFollower': {
+            'ros__parameters': {
+                'waypoints_file': LaunchConfiguration('waypoints_file'),
+                #'update_frequency': LaunchConfiguration('update_frequency')
+            }
+        }
+    }
 
     rsp = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([os.path.join(
-            get_package_share_directory(package_name), 'launch', 'rsp.launch.py'
-        )]), launch_arguments={'use_sim_time': 'true', 'use_ros2_control': 'false'}.items()
+            get_package_share_directory(package_name), 'launch', 'view.launch.py'
+        )]), launch_arguments={'use_sim_time': 'true'}.items()
     )
 
-    gazebo_params_file = os.path.join(get_package_share_directory(package_name), 'config', 'gazebo_params.yaml')
 
-    #add the word
-
-    world_path = os.path.join(get_package_share_directory('my_bot'), 'worlds' , 'wordtest.sdf')
-
-    gazebo = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource([os.path.join(
-            get_package_share_directory('gazebo_ros'), 'launch', 'gazebo.launch.py')]),
-        launch_arguments={'extra_gazebo_args': '--ros-args --params-file ' + gazebo_params_file}.items()
-    )
-
-    # Include the Gazebo launch file, provided by the gazebo_ros package
-    gazebo1 = IncludeLaunchDescription(
-                PythonLaunchDescriptionSource([os.path.join(
-                    get_package_share_directory('gazebo_ros'), 'launch', 'gazebo.launch.py')]),
-             )
-
-    # Run the spawner node from the gazebo_ros package. The entity name doesn't really matter if you only have a single robot.
-    #spawn_entity = Node(package='gazebo_ros', executable='spawn_entity.py', arguments=['-topic', 'robot_description',  '-entity', 'my_bot'], output='screen')
+    world_path = os.path.join(get_package_share_directory('my_bot'), 'worlds' , 'outdoor.sdf')
 
     spawn_entity = Node(
         package='gazebo_ros',
         executable='spawn_entity.py',
         name='urdf_spawner',
         arguments=['-entity', 'my_bot', '-topic', 'robot_description'],
-        output='screen'
+        output='screen',
+        parameters=[LaunchConfiguration('use_sim_time')]
     )
 
-    diff_drive_spawner = Node(
-        package="controller_manager",
-        executable="spawner.py",
-        arguments=["diff_cont"],
-    )
 
-    joint_broad_spawner = Node(
-        package="controller_manager",
-        executable="spawner.py",
-        arguments=["joint_broad"],
-    )
 
     rviz_node = Node(
         package='rviz2',
@@ -86,37 +70,63 @@ def generate_launch_description():
         parameters=[LaunchConfiguration('use_sim_time')],
         arguments=['-d', LaunchConfiguration('rvizconfig')])
     
-    #transformation map base_link
-    transform_base_map = Node(
-            package='my_bot',
-            executable='transform.py',
-            name='transform_node',
-            output='screen',
-            
-          )
-    
-    #server save the coordonnate
-    server_save = Node(
-            package='my_bot',
-            executable='save_coordinates_server.py',
-            name='server_node',
-            output='screen',
-            
-          )
-    
-    #client save the coordonnate
-    client_save = Node(
-            package='my_bot',
-            executable='save_coordinates_client.py',
-            name='client_node',
-            output='screen',
-            
-          )
 
-    static_transform = Node(package="tf2_ros",
-                            executable="static_transform_publisher",
-                            # arguments = ["-5.0", "-30.0", "0.", "0.0", "0", "0.0", "map", "odom"])
-                            arguments=["0.0", "0.0", "0.", "0.0", "0", "0.0", "map", "base_link"])
+
+      # Lancer le contrôleur
+    controller_server = Node(
+        package='nav2_controller',
+        executable='controller_server',
+        name='controller_server',
+        output='screen',
+        parameters=[{'use_sim_time': True}])
+
+    # Lancer le waypoint follower
+    waypoint_follower = Node(
+        package='nav2_waypoint_follower',
+        executable='waypoint_follower',
+        name='waypoint_follower',
+        output='screen',
+        parameters=[waypoint_follower_params]
+                                   )
+    
+    # Start the navsat transform node which converts GPS data into the world coordinate frame
+    start_navsat_transform_cmd = Node(
+        package='robot_localization',
+        executable='navsat_transform_node',
+        name='navsat_transform',
+        output='screen',
+        parameters=[robot_localization_file_path, 
+        {'use_sim_time': use_sim_time}],
+        remappings=[('imu', 'imu'),
+                    ('gps/fix', 'gps/fix'), 
+                    ('gps/filtered', 'gps/filtered'),
+                    ('odometry/gps', 'odometry/gps'),
+                    ('odometry/filtered', 'odometry/global')])
+
+  # Start robot localization using an Extended Kalman filter...map->odom transform
+    start_robot_localization_global_cmd = Node(
+        package='robot_localization',
+        executable='ekf_node',
+        name='ekf_filter_node_map',
+        output='screen',
+        parameters=[robot_localization_file_path, 
+        {'use_sim_time': use_sim_time}],
+        remappings=[('odometry/filtered', 'odometry/global'),
+                    ('/set_pose', '/initialpose')])
+
+  # Start robot localization using an Extended Kalman filter...odom->base_footprint transform
+    start_robot_localization_local_cmd = Node(
+        package='robot_localization',
+        executable='ekf_node',
+        name='ekf_filter_node_odom',
+        output='screen',
+        parameters=[robot_localization_file_path, 
+        {'use_sim_time': use_sim_time}],
+        remappings=[('odometry/filtered', 'odometry/local'),
+                    ('/set_pose', '/initialpose')])
+
+
+   
 
     # Launch them all!
     return LaunchDescription([
@@ -137,8 +147,8 @@ def generate_launch_description():
                                              description='Automatically startup the nav2 stack'),
         launch.actions.DeclareLaunchArgument(name='default_bt_xml_filename', default_value=behavior_tree_xml_path,
                                              description='Full path to the behavior tree xml file to use'),
-        launch.actions.DeclareLaunchArgument(name='slam', default_value='False',
-                                             description='Whether to run SLAM'),
+        launch.actions.DeclareLaunchArgument(name='waypoints_file', default_value='/home/franklin/ws/src/my_bot/worlds/waypoints.yaml',
+                                             description='Chemin absolu vers le fichier YAML de waypoints'),
 
         # Launch the ROS 2 Navigation Stack
         launch.actions.IncludeLaunchDescription(
@@ -153,13 +163,11 @@ def generate_launch_description():
 
         rsp,
         rviz_node,
-        #static_transform,
-        transform_base_map,
-        #gazebo,
         spawn_entity,
-        server_save,
-        #client_save,
-        #diff_drive_spawner,
-        #joint_broad_spawner,
-        #gazebo
+        start_navsat_transform_cmd,
+        start_robot_localization_global_cmd,
+        start_robot_localization_local_cmd,
+        #waypoint_follower,
+        #controller_server
+        
     ])
