@@ -31,3 +31,4 @@ ros2 launch my_bot launch_sim.launch.py
 ```
 ros2 run my_bot vitual_gps.py
 ```
+[![Vidéo démo]([https://img.youtube.com/vi/VOTRE_CODE_EMBED/0.jpg](https://www.youtube.com/watch?v=GkBH9noZzc8))]([https://www.youtube.com/watch?v=VOTRE_CODE_EMBED](https://www.youtube.com/watch?v=GkBH9noZzc8)https://www.youtube.com/watch?v=GkBH9noZzc8)
