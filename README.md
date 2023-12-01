@@ -38,5 +38,3 @@ https://github.com/Klein237/my_bot/assets/129269142/86448812-f561-4524-991d-6114
 
 https://github.com/Klein237/my_bot/assets/129269142/08dfee57-358a-4bdd-9889-5557c18c22af
 
-### test
-https://github.com/Klein237/my_bot/blob/main/ack_movies_c.webm
